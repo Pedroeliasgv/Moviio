@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Search } from 'lucide-react'
-import { Badge, Button, Card, Input, Select, Table } from '../components/ui'
-import { leads } from '../lib/mockData'
+import { Badge, Button, Card, Input, Modal, Select, Table } from '../components/ui'
+import { leads, properties } from '../lib/mockData'
+import type { Lead } from '../lib/types'
 
 const statusVariants: Record<string, 'primary' | 'muted' | 'warning' | 'success' | 'danger'> = {
   Novo: 'primary',
@@ -14,14 +15,21 @@ const statusVariants: Record<string, 'primary' | 'muted' | 'warning' | 'success'
 
 const statusOptions = ['Todos', 'Novo', 'Contato Feito', 'Visita Marcada', 'Proposta', 'Fechado', 'Perdido']
 
+const leadTimeline = [
+  { timestamp: 'Hoje, 09:00', event: 'Primeiro contato por WhatsApp' },
+  { timestamp: 'Hoje, 14:30', event: 'Envio de proposta inicial' },
+  { timestamp: 'Ontem, 18:00', event: 'Agendamento de visita' },
+]
+
 export default function LeadsPage() {
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('Todos')
   const [page, setPage] = useState(1)
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
 
   const filteredLeads = useMemo(() => {
     return leads.filter((lead) => {
-      const matchesSearch = [lead.name, lead.phone, lead.interest, lead.email].some((field) =>
+      const matchesSearch = [lead.name, lead.phone, lead.interest, lead.email, lead.origin].some((field) =>
         field.toLowerCase().includes(search.toLowerCase()),
       )
       const matchesStatus = status === 'Todos' || lead.status === status
@@ -35,13 +43,15 @@ export default function LeadsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-[28px] border border-slate-200 bg-white p-6 shadow-panel sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-[16px] border border-slate-200 bg-white p-6 shadow-panel sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm uppercase tracking-[0.35em] text-slate-500">Leads</p>
           <h1 className="mt-3 text-3xl font-semibold text-slate-950">Lista de leads</h1>
           <p className="mt-2 text-sm leading-6 text-slate-600">Ferramentas rápidas para classificar, filtrar e avançar negócios.</p>
         </div>
-        <Button variant="primary">Adicionar novo lead</Button>
+        <Button variant="primary" className="rounded-[12px]" onClick={() => setSelectedLead(leads[0])}>
+          Adicionar novo lead
+        </Button>
       </div>
 
       <Card title="Buscar e filtrar" description="Aplique filtros para localizar leads por status, interesse ou canal." className="space-y-4">
@@ -63,10 +73,10 @@ export default function LeadsPage() {
             ))}
           </Select>
           <div className="flex items-center gap-3">
-            <Button variant="secondary" className="w-full rounded-3xl">
+            <Button variant="secondary" className="w-full rounded-[12px]">
               Limpar
             </Button>
-            <Button variant="ghost" className="w-full rounded-3xl border border-slate-200 text-slate-700 hover:bg-slate-50">
+            <Button variant="ghost" className="w-full rounded-[12px] border border-slate-200 text-slate-700 hover:bg-slate-50">
               Atualizar
             </Button>
           </div>
@@ -99,7 +109,7 @@ export default function LeadsPage() {
                   <td className="px-6 py-4 text-slate-600">Ana Ribeiro</td>
                   <td className="px-6 py-4 text-slate-600">{lead.created_at}</td>
                   <td className="px-6 py-4">
-                    <Button variant="ghost" className="rounded-3xl px-3 py-2 text-slate-700 hover:bg-slate-100">
+                    <Button variant="ghost" className="rounded-full px-3 py-2 text-slate-700 hover:bg-slate-100" onClick={() => setSelectedLead(lead)}>
                       Ver
                     </Button>
                   </td>
@@ -113,7 +123,7 @@ export default function LeadsPage() {
           <p className="text-sm text-slate-500">
             Mostrando {paginatedLeads.length} de {filteredLeads.length} leads
           </p>
-          <div className="inline-flex items-center gap-3 rounded-3xl border border-slate-200 bg-slate-50 px-3 py-2">
+          <div className="inline-flex items-center gap-3 rounded-[12px] border border-slate-200 bg-slate-50 px-3 py-2">
             <Button
               variant="ghost"
               size="sm"
@@ -136,6 +146,81 @@ export default function LeadsPage() {
           </div>
         </div>
       </Card>
+
+      <Modal open={Boolean(selectedLead)} title={selectedLead?.name ?? 'Detalhes do lead'} description="Visão completa do lead e suas interações." onClose={() => setSelectedLead(null)}>
+        {selectedLead ? (
+          <div className="space-y-6">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2 rounded-[16px] border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Contato</p>
+                <p className="text-sm font-semibold text-slate-950">{selectedLead.phone}</p>
+                <p className="text-sm text-slate-600">{selectedLead.email}</p>
+              </div>
+              <div className="space-y-2 rounded-[16px] border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Origem</p>
+                <p className="text-sm font-semibold text-slate-950">{selectedLead.origin}</p>
+                <p className="text-sm text-slate-600">Faixa: {selectedLead.price_range}</p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-[16px] border border-slate-200 bg-slate-50 p-4">
+                <p className="text-sm uppercase tracking-[0.35em] text-slate-500">Status</p>
+                <Badge variant={statusVariants[selectedLead.status] ?? 'muted'}>{selectedLead.status}</Badge>
+              </div>
+              <div className="rounded-[16px] border border-slate-200 bg-slate-50 p-4">
+                <p className="text-sm uppercase tracking-[0.35em] text-slate-500">Corretor responsável</p>
+                <p className="mt-2 text-sm font-semibold text-slate-950">Ana Ribeiro</p>
+              </div>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+              <div className="space-y-4 rounded-[16px] border border-slate-200 bg-white p-5">
+                <h3 className="text-lg font-semibold text-slate-950">Notas</h3>
+                <p className="text-sm leading-6 text-slate-600">{selectedLead.notes}</p>
+              </div>
+              <div className="space-y-4 rounded-[16px] border border-slate-200 bg-white p-5">
+                <h3 className="text-lg font-semibold text-slate-950">Tarefas</h3>
+                <div className="space-y-3">
+                  <div className="rounded-[16px] bg-slate-50 p-3">
+                    <p className="text-sm font-semibold text-slate-950">Confirmar visita</p>
+                    <p className="text-xs text-slate-500">Agendado para hoje às 14:00</p>
+                  </div>
+                  <div className="rounded-[16px] bg-slate-50 p-3">
+                    <p className="text-sm font-semibold text-slate-950">Enviar contrato</p>
+                    <p className="text-xs text-slate-500">Pendente</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="rounded-[16px] border border-slate-200 bg-slate-50 p-5">
+                <h3 className="text-lg font-semibold text-slate-950">Timeline</h3>
+                <div className="mt-4 space-y-3">
+                  {leadTimeline.map((event) => (
+                    <div key={event.timestamp} className="rounded-[16px] bg-white p-4 shadow-sm">
+                      <p className="text-sm font-semibold text-slate-950">{event.event}</p>
+                      <p className="mt-1 text-xs text-slate-500">{event.timestamp}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-[16px] border border-slate-200 bg-slate-50 p-5">
+                <h3 className="text-lg font-semibold text-slate-950">Imóveis relacionados</h3>
+                <div className="mt-4 space-y-3">
+                  {properties.slice(0, 2).map((property) => (
+                    <div key={property.id} className="rounded-[16px] bg-white p-4">
+                      <p className="text-sm font-semibold text-slate-950">{property.title}</p>
+                      <p className="mt-1 text-sm text-slate-500">{property.city} · {property.area} m²</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </Modal>
     </div>
   )
 }
