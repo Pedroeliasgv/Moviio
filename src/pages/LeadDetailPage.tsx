@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, CalendarDays, MapPin, Phone, User } from 'lucide-react'
+import { ArrowLeft, Phone, User } from 'lucide-react'
 import { Button, Card, Badge } from '../components/ui'
 import { loadState } from '../lib/storage'
 import { leads } from '../lib/mockData'
