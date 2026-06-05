@@ -16,21 +16,21 @@ const statusVariant: Record<string, 'primary' | 'muted' | 'warning' | 'success' 
 }
 
 const kpiCards = [
-  { label: 'Leads do mês', value: dashboardMetrics.monthlyLeads, delta: '+12%', icon: Users, accent: 'from-sky-500 to-cyan-500' },
-  { label: 'Novos clientes', value: dashboardMetrics.newClients, delta: '+18%', icon: Sparkles, accent: 'from-emerald-500 to-teal-500' },
-  { label: 'Imóveis ativos', value: dashboardMetrics.activeProperties, delta: '+4%', icon: LayoutList, accent: 'from-violet-500 to-indigo-500' },
-  { label: 'Taxa de conversão', value: `${dashboardMetrics.conversionRate}%`, delta: '+9%', icon: TrendingUp, accent: 'from-amber-500 to-orange-400' },
-  { label: 'Comissão prevista', value: dashboardMetrics.expectedCommission.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), delta: '+9%', icon: DollarSign, accent: 'from-blue-500 to-sky-500' },
-  { label: 'Comissão recebida', value: dashboardMetrics.commissionReceived.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), delta: '+14%', icon: DollarSign, accent: 'from-emerald-500 to-teal-500' },
-  { label: 'Visitas agendadas', value: dashboardMetrics.scheduledVisits, delta: '+7%', icon: CalendarDays, accent: 'from-sky-500 to-cyan-500' },
-  { label: 'Contratos fechados', value: dashboardMetrics.closedDeals, delta: '+22%', icon: ClipboardList, accent: 'from-indigo-500 to-violet-500' },
+  { label: 'Leads do mês', value: dashboardMetrics.monthlyLeads, delta: '+12%', icon: Users, route: '/leads', accent: 'from-sky-500 to-cyan-500' },
+  { label: 'Novos clientes', value: dashboardMetrics.newClients, delta: '+18%', icon: Sparkles, route: '/clients', accent: 'from-emerald-500 to-teal-500' },
+  { label: 'Imóveis ativos', value: dashboardMetrics.activeProperties, delta: '+4%', icon: LayoutList, route: '/properties', accent: 'from-violet-500 to-indigo-500' },
+  { label: 'Taxa de conversão', value: `${dashboardMetrics.conversionRate}%`, delta: '+9%', icon: TrendingUp, route: '/reports', accent: 'from-amber-500 to-orange-400' },
+  { label: 'Comissão prevista', value: dashboardMetrics.expectedCommission.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), delta: '+9%', icon: DollarSign, route: '/reports', accent: 'from-blue-500 to-sky-500' },
+  { label: 'Comissão recebida', value: dashboardMetrics.commissionReceived.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), delta: '+14%', icon: DollarSign, route: '/reports', accent: 'from-emerald-500 to-teal-500' },
+  { label: 'Visitas agendadas', value: dashboardMetrics.scheduledVisits, delta: '+7%', icon: CalendarDays, route: '/agenda', accent: 'from-sky-500 to-cyan-500' },
+  { label: 'Contratos fechados', value: dashboardMetrics.closedDeals, delta: '+22%', icon: ClipboardList, route: '/reports', accent: 'from-indigo-500 to-violet-500' },
 ]
 
 const activityFeed = [
-  { time: 'Agora', title: 'Nova visita agendada', description: 'Visita confirmada para Mariana Silva em Higienópolis.', badge: 'Visita' },
-  { time: '1h atrás', title: 'Novo lead cadastrado', description: 'Bruno Alves entrou em contato via WhatsApp.', badge: 'Lead' },
-  { time: 'Ontem', title: 'Proposta enviada', description: 'Proposta para Fernanda Lima foi enviada.', badge: 'Proposta' },
-  { time: '2 dias', title: 'Imóvel reservado', description: 'Casa em Granja Viana recebeu reserva formal.', badge: 'Imóvel' },
+  { time: 'Agora', title: 'Nova visita agendada', description: 'Visita confirmada para Mariana Silva em Higienópolis.' },
+  { time: '1h atrás', title: 'Novo lead cadastrado', description: 'Bruno Alves entrou em contato via WhatsApp.' },
+  { time: 'Ontem', title: 'Proposta enviada', description: 'Proposta para Fernanda Lima foi enviada.' },
+  { time: '2 dias', title: 'Imóvel reservado', description: 'Casa em Granja Viana recebeu reserva formal.' },
 ]
 
 export default function DashboardPage() {
@@ -105,7 +105,12 @@ export default function DashboardPage() {
         {kpiCards.map((item) => {
           const Icon = item.icon
           return (
-            <div key={item.label} className="rounded-[16px] border border-slate-200 bg-white p-6 shadow-card">
+            <button
+              key={item.label}
+              type="button"
+              onClick={() => handleAction(item.route)}
+              className="rounded-[16px] border border-slate-200 bg-white p-6 text-left shadow-card transition hover:-translate-y-0.5 hover:border-slate-300"
+            >
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-xs uppercase tracking-[0.35em] text-slate-500">{item.label}</p>
@@ -119,7 +124,7 @@ export default function DashboardPage() {
                 <ArrowUpRight className="h-4 w-4 text-emerald-400" />
                 <span>{item.delta} desde último mês</span>
               </div>
-            </div>
+            </button>
           )
         })}
       </motion.section>
@@ -188,10 +193,10 @@ export default function DashboardPage() {
                     </td>
                     <td className="px-6 py-3 text-sm text-slate-600">
                       <div className="flex flex-wrap gap-2">
-                        <Button variant="ghost" size="sm" className="rounded-full px-3 py-1" onClick={() => handleAction('/leads')}>
+                        <Button variant="ghost" size="sm" className="rounded-full px-3 py-1" onClick={() => navigate(`/leads/${lead.id}`)}>
                           Ver
                         </Button>
-                        <Button variant="outline" size="sm" className="rounded-full px-3 py-1" onClick={() => handleAction('/leads')}>
+                        <Button variant="outline" size="sm" className="rounded-full px-3 py-1" onClick={() => navigate('/leads')}>
                           Editar
                         </Button>
                         <Button variant="secondary" size="sm" className="rounded-full px-3 py-1" onClick={() => handleDeleteLead(lead.id)}>
